@@ -1,4 +1,6 @@
-#!/usr/bin/env
+#!/usr/bin/env bash
+
+TYPE=$1
 
 echo -- Parando contenedores --
 sudo docker container stop easylife_api
@@ -22,8 +24,13 @@ echo -- Copiando ficheros... --
 sudo cp -R ./clones/easylife__API/src/* ./api
 sudo cp -R ./clones/easylife__API/src/.* ./api
 
-echo -- Creando contenedores --
-sudo docker container run -d --expose 80 -v /opt/easylife/api:/var/www/html -e VIRTUAL_HOST=api.easylife.pve2.fpmislata.com -e LETSENCRYPT_HOST=api.easylife.pve2.fpmislata.com --net nginx-net --name easylife_api php:7.3-apache
+echo -- Creando contenedores en $TYPE --
+
+if [ $TYPE = 'produccion' ]; then
+    sudo docker container run -d --expose 80 -v /opt/easylife/api:/var/www/html -e VIRTUAL_HOST=api.easylife.pve2.fpmislata.com -e LETSENCRYPT_HOST=api.easylife.pve2.fpmislata.com --net nginx-net --name easylife_api php:7.3-apache
+elif [ $TYPE = 'preproduccion' ]; then
+    sudo docker container run -d -p 10102:80 -v /opt/easylife/api:/var/www/html -e VIRTUAL_HOST=api.easylife.pve2.fpmislata.com -e LETSENCRYPT_HOST=api.easylife.pve2.fpmislata.com --net nginx-net --name easylife_api php:7.3-apache
+fi
 sudo chmod -R 777 ./api
 
 echo -- Configurando contenedor --

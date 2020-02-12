@@ -1,4 +1,6 @@
-#!/usr/bin/env
+#!/usr/bin/env bash
+
+TYPE=$1
 
 echo -- Parando contenedores --
 sudo docker container stop easylife_www
@@ -25,5 +27,9 @@ sudo npm run build --prefix ./clones/easylife__SITE/
 echo -- Copiando ficheros... --
 sudo cp -R ./clones/easylife__SITE/dist/* ./www
 
-echo -- Creando contenedores --
-sudo docker container run -d --expose 80 -v /opt/easylife/www:/usr/local/apache2/htdocs/ -e VIRTUAL_HOST=www.easylife.pve2.fpmislata.com -e LETSENCRYPT_HOST=www.easylife.pve2.fpmislata.com --net nginx-net --name easylife_www httpd:latest
+echo -- Creando contenedores de $TYPE --
+if [ $TYPE = 'produccion' ]; then
+    sudo docker container run -d --expose 80 -v /opt/easylife/www:/usr/local/apache2/htdocs/ -e VIRTUAL_HOST=www.easylife.pve2.fpmislata.com -e LETSENCRYPT_HOST=www.easylife.pve2.fpmislata.com --net nginx-net --name easylife_www httpd:latest
+elif [ $TYPE = 'preproduccion' ]; then
+    sudo docker container run -d -p 10101:80 -v /opt/easylife/www:/usr/local/apache2/htdocs/ -e VIRTUAL_HOST=www.easylife.pve2.fpmislata.com -e LETSENCRYPT_HOST=www.easylife.pve2.fpmislata.com --net nginx-net --name easylife_www httpd:latest
+fi
